@@ -1,4 +1,5 @@
 import Axis from '@/components/axis';
+import CssColorTable from '@/components/css-color-table';
 import SmileFace from '@/components/smile-face';
 
 export default function Home() {
@@ -7,6 +8,7 @@ export default function Home() {
       <h1 className="text-3xl font-bold underline">Hello world!</h1>
       <Axis height={300} width={300} />
       <SmileFace />
+      <CssColorTable />
     </main>
   );
 }
