@@ -74,12 +74,12 @@
   left: 0;
   padding: 0.6em 1em;
   background: #fff;
-  /* text-align: center; */
-  /* border: 1px solid #ddd; */
+  border: 1px solid #ddd;
   box-shadow: 0 6px 8px rgba(52, 73, 94, 0.2), 0 1px 1px rgba(52, 73, 94, 0.1);
   z-index: 10;
   transition: all 0.2s ease-out;
   pointer-events: none;
+  border-radius: 0.275rem;
 }
 
 .tooltip:before {

@@ -105,12 +105,13 @@ function TaskEstimationChart() {
   const barPadding = 1.5;
 
   const binsRef = useRef([]);
+  const [hoveredBin, setHoveredBin] = useState(null);
   const tooltipRef = useRef(null);
 
   const [selectedBin, setSelectedBin] = useState(null);
   const [displayTooltip, setDisplayTooltip] = useState(false);
   const [tooltipData, setTooltipData] = useState(initialTooltipData);
-  function handleMouseEnter(e, datum) {
+  function handleMouseEnter(e, datum, idx) {
     // tooltip essential value
     const range = [
       datum.x0 < 0 ? `Under-estimated by` : `Over-estimated by`,
@@ -135,6 +136,8 @@ function TaskEstimationChart() {
       dimensions.margin.left;
     const y = yScale(yAccessor(datum)) + dimensions.margin.top;
     tooltipRef.current.style.transform = `translate(calc( -50% + ${x}px), calc(-100% + ${y}px))`;
+    binsRef.current.children[idx].classList.add('hovered');
+    setHoveredBin(binsRef.current.children[idx]);
 
     setTooltipData({
       range,
@@ -146,9 +149,10 @@ function TaskEstimationChart() {
     setDisplayTooltip(true);
   }
 
-  function handleMouseLeave() {
+  function handleMouseLeave(idx) {
     setDisplayTooltip(false);
     setTooltipData(initialTooltipData);
+    hoveredBin?.classList.remove('hovered');
   }
 
   return (
@@ -192,9 +196,9 @@ function TaskEstimationChart() {
 
             {/* bar chart data */}
             <g className="bins" ref={binsRef}>
-              {binsGenerator(dataset).map((bin) => (
+              {binsGenerator(dataset).map((bin, idx) => (
                 <rect
-                  key={bin.x0}
+                  key={idx}
                   className="bin"
                   x={xScale(bin.x0)}
                   y={yScale(yAccessor(bin))}
@@ -203,27 +207,25 @@ function TaskEstimationChart() {
                     xScale(bin.x1) - xScale(bin.x0) - barPadding,
                   ])}
                   height={dimensions.boundedHeight - yScale(yAccessor(bin))}
-                  onMouseEnter={(e) => handleMouseEnter(e, bin)}
-                  onMouseLeave={() => handleMouseLeave()}
                 />
               ))}
             </g>
 
             {/* bar interaction enhancement */}
-            {/* <g className="bins">
-              {binsGenerator(dataset).map((bin) => (
+            <g className="bins">
+              {binsGenerator(dataset).map((bin, idx) => (
                 <rect
-                  key={bin.x0}
+                  key={idx}
                   className="listeners"
                   x={xScale(bin.x0)}
                   y={-dimensions.margin.top}
                   width={d3.max([0, xScale(bin.x1) - xScale(bin.x0)])}
                   height={dimensions.boundedHeight + dimensions.margin.top}
-                  onMouseEnter={() => handleMouseEnter(bin.x0)}
-                  onMouseLeave={() => handleMouseLeave(bin)}
+                  onMouseEnter={(e) => handleMouseEnter(e, bin, idx)}
+                  onMouseLeave={() => handleMouseLeave()}
                 />
               ))}
-            </g> */}
+            </g>
 
             {/* mean line */}
             <text className="mean-label" x={xScale(mean)} y={-25}>

@@ -10,6 +10,8 @@ async function drawBars() {
   const summaryAccessor = (d) => d.Summary;
   const actualHoursAccessor = (d) => +d.HoursActual;
   const developerHoursAccessor = (d) => +d.DeveloperHoursActual;
+  const diffAccessor = (d) => +d.HoursEstimate - actualHoursAccessor(d);
+  const yAccessor = (d) => d.length;
 
   // Only use the first estimate per task (with highest actual hours)
   let usedTasks = {};
@@ -22,11 +24,9 @@ async function drawBars() {
     usedTasks[summaryAccessor(d)] = hours;
     return actualHoursAccessor(d) > 10;
   });
-  const diffAccessor = (d) => +d.HoursEstimate - actualHoursAccessor(d);
   dataset = dataset.filter(
     (d) => diffAccessor(d) >= -50 && diffAccessor(d) <= 50
   );
-  const yAccessor = (d) => d.length;
 
   // set the diemnsions and margins of the graph
   const width = 600;
@@ -45,6 +45,7 @@ async function drawBars() {
   dimensions.boundedHeight =
     dimensions.height - dimensions.margin.top - dimensions.margin.bottom;
 
+  // draw chart
   const wrapper = d3
     .select('#wrapper')
     .append('svg')
@@ -67,6 +68,7 @@ async function drawBars() {
     .append('text')
     .attr('class', 'x-axis-label');
 
+  // create scales
   const xScale = d3
     .scaleLinear()
     .domain(d3.extent(dataset, diffAccessor))
@@ -84,6 +86,7 @@ async function drawBars() {
     .range([dimensions.boundedHeight, 0])
     .nice();
 
+  // draw data
   const barPadding = 1.5;
   let binGroups = bounds.select('.bins').selectAll('.bin').data(bins);
   binGroups.exit().remove();
@@ -223,28 +226,29 @@ function TaskEstimation() {
   }, []);
 
   return (
-    <>
-      <h1>Task Estimation</h1>
-      <p>Estimate the time it will take to complete a task.</p>
-      <div id="wrapper" class="wrapper">
-        <div id="tooltip" class="tooltip">
-          <div class="tooltip-range" id="range"></div>
-          <div class="tooltip-examples" id="examples"></div>
-          <div class="tooltip-value">
+    <div className="flex flex-col items-center">
+      <h1 className="title">
+        Task estimation errors over ten years of commercial development
+      </h1>
+      <div id="wrapper" className="wrapper">
+        <div id="tooltip" className="tooltip">
+          <div className="tooltip-range" id="range"></div>
+          <div className="tooltip-examples" id="examples"></div>
+          <div className="tooltip-value">
             ...of <span id="count"></span> tasks
           </div>
-          <div class="tooltip-bar-value">
+          <div className="tooltip-bar-value">
             <b>
               <span id="tooltip-bar-value"></span>%
             </b>
             of the work was done by developers
           </div>
-          <div class="tooltip-bar">
-            <div class="tooltip-bar-fill" id="tooltip-bar-fill"></div>
+          <div className="tooltip-bar">
+            <div className="tooltip-bar-fill" id="tooltip-bar-fill"></div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
