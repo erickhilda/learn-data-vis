@@ -1,14 +1,11 @@
-import Axis from '@/components/axis';
-import CssColorTable from '@/components/css-color-table';
-import SmileFace from '@/components/smile-face';
+import TaskEstimationChart from '@/components/chart/task-estimation-chart';
+import TaskEstimation from '@/components/example/task-estimation';
 
 export default function Home() {
   return (
     <main className="flex flex-col items-center p-24 min-h-screen">
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
-      <Axis height={300} width={300} />
-      <SmileFace />
-      <CssColorTable />
+      <TaskEstimation />
+      {/* <TaskEstimationChart /> */}
     </main>
   );
 }
