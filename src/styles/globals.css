@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .wrapper {
-  position: relative;
+  @apply relative;
 }
 
 .title {
@@ -113,7 +113,7 @@
   opacity: 0.6;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  /* white-space: nowrap; */
 }
 
 .tooltip-value {

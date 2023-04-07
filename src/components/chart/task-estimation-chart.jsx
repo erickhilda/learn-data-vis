@@ -3,6 +3,14 @@
 import * as d3 from 'd3';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
+const initialTooltipData = {
+  range: '',
+  count: '',
+  task: [],
+  barPercentage: '',
+  barValue: '',
+};
+
 function TaskEstimationChart() {
   const width = 600;
   let dimensions = {
@@ -101,14 +109,46 @@ function TaskEstimationChart() {
 
   const [selectedBin, setSelectedBin] = useState(null);
   const [displayTooltip, setDisplayTooltip] = useState(false);
+  const [tooltipData, setTooltipData] = useState(initialTooltipData);
   function handleMouseEnter(e, datum) {
+    // tooltip essential value
+    const range = [
+      datum.x0 < 0 ? `Under-estimated by` : `Over-estimated by`,
+      Math.abs(datum.x0),
+      'to',
+      Math.abs(datum.x1),
+      'hours',
+    ].join(' ');
+    const taskSample = datum.slice(0, 3).map(summaryAccessor);
+    const count = Math.max(0, yAccessor(datum) - 2);
+
+    const percentDeveloperHoursValues = datum.map(
+      (d) => developerHoursAccessor(d) / actualHoursAccessor(d) || 0
+    );
+    const percentDeveloperHours = d3.mean(percentDeveloperHoursValues);
+    const formatHours = (d) => d3.format(',.2f')(Math.abs(d));
+
+    // tooltip position
+    const x =
+      xScale(datum.x0) +
+      (xScale(datum.x1) - xScale(datum.x0)) / 2 +
+      dimensions.margin.left;
+    const y = yScale(yAccessor(datum)) + dimensions.margin.top;
+    tooltipRef.current.style.transform = `translate(calc( -50% + ${x}px), calc(-100% + ${y}px))`;
+
+    setTooltipData({
+      range,
+      task: taskSample,
+      count,
+      barValue: formatHours(percentDeveloperHours),
+      barPercentage: percentDeveloperHours * 100,
+    });
     setDisplayTooltip(true);
-    setSelectedBin(datum);
   }
 
   function handleMouseLeave() {
     setDisplayTooltip(false);
-    setSelectedBin(null);
+    setTooltipData(initialTooltipData);
   }
 
   return (
@@ -117,7 +157,7 @@ function TaskEstimationChart() {
         Task estimation errors over ten years of commercial development
       </h2>
 
-      <div id="wrapper" className={``}>
+      <div id="wrapper" className="relative">
         <svg width={width} height={dimensions.height}>
           <g
             transform={`translate(${dimensions.margin.left}, ${dimensions.margin.top})`}
@@ -227,19 +267,28 @@ function TaskEstimationChart() {
           className="tooltip"
           style={{ opacity: displayTooltip ? 1 : 0 }}
         >
-          <div className="tooltip-range" id="range"></div>
-          <div className="tooltip-examples" id="examples"></div>
+          <div className="tooltip-range" id="range">
+            {tooltipData.range}
+          </div>
+          <div className="tooltip-examples" id="examples">
+            {tooltipData.task.map((task) => (
+              <span key={task}>{task}</span>
+            ))}
+          </div>
           <div className="tooltip-value">
-            ...of <span id="count"></span> tasks
+            ...of <span id="count">{tooltipData.count}</span> tasks
           </div>
           <div className="tooltip-bar-value">
             <b>
-              <span id="tooltip-bar-value"></span>%
+              <span id="tooltip-bar-value">{tooltipData.barValue}</span>%
             </b>
             of the work was done by developers
           </div>
           <div className="tooltip-bar">
-            <div className="tooltip-bar-fill" id="tooltip-bar-fill"></div>
+            <div
+              className="tooltip-bar-fill"
+              style={{ width: `${tooltipData.barPercentage}%` }}
+            ></div>
           </div>
         </div>
       </div>
