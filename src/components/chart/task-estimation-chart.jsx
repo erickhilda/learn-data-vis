@@ -108,7 +108,6 @@ function TaskEstimationChart() {
   const [hoveredBin, setHoveredBin] = useState(null);
   const tooltipRef = useRef(null);
 
-  const [selectedBin, setSelectedBin] = useState(null);
   const [displayTooltip, setDisplayTooltip] = useState(false);
   const [tooltipData, setTooltipData] = useState(initialTooltipData);
   function handleMouseEnter(e, datum, idx) {
@@ -136,6 +135,7 @@ function TaskEstimationChart() {
       dimensions.margin.left;
     const y = yScale(yAccessor(datum)) + dimensions.margin.top;
     tooltipRef.current.style.transform = `translate(calc( -50% + ${x}px), calc(-100% + ${y}px))`;
+    // styling the hovered bin
     binsRef.current.children[idx].classList.add('hovered');
     setHoveredBin(binsRef.current.children[idx]);
 
@@ -157,17 +157,17 @@ function TaskEstimationChart() {
 
   return (
     <div className="flex flex-col items-center">
-      <h2 className="text-2xl font-extrabold text-slate-600 max-w-md text-center mb-4">
+      <h2 className="font-extrabold max-w-xs mb-4 text-center text-2xl">
         Task estimation errors over ten years of commercial development
       </h2>
 
-      <div id="wrapper" className="relative">
+      <div className="relative">
         <svg width={width} height={dimensions.height}>
           <g
             transform={`translate(${dimensions.margin.left}, ${dimensions.margin.top})`}
           >
             {/* chant background */}
-            <g className="label">
+            <g className="fill-gray-700 text-xs font-sans font-semibold opacity-80 mix-blend-hard-light">
               <text className="left-side-label" x={10} y={-25}>
                 Under-estimated
               </text>
@@ -180,13 +180,13 @@ function TaskEstimationChart() {
               </text>
 
               <rect
-                className="background left-side-background"
+                className="fill-slate-50"
                 y={-20}
                 width={dimensions.boundedWidth / 2}
                 height={dimensions.boundedHeight + 20}
               />
               <rect
-                className="background right-side-background"
+                className="fill-slate-300"
                 x={dimensions.boundedWidth / 2 + 1}
                 y={-20}
                 width={dimensions.boundedWidth / 2}
@@ -199,7 +199,7 @@ function TaskEstimationChart() {
               {binsGenerator(dataset).map((bin, idx) => (
                 <rect
                   key={idx}
-                  className="bin"
+                  className="fill-indigo-500 transition-all"
                   x={xScale(bin.x0)}
                   y={yScale(yAccessor(bin))}
                   width={d3.max([
@@ -216,7 +216,7 @@ function TaskEstimationChart() {
               {binsGenerator(dataset).map((bin, idx) => (
                 <rect
                   key={idx}
-                  className="listeners"
+                  className="fill-transparent"
                   x={xScale(bin.x0)}
                   y={-dimensions.margin.top}
                   width={d3.max([0, xScale(bin.x1) - xScale(bin.x0)])}
@@ -232,7 +232,7 @@ function TaskEstimationChart() {
               mean
             </text>
             <line
-              className="mean"
+              className="mean-line"
               x1={xScale(mean)}
               x2={xScale(mean)}
               y1={-20}
@@ -246,8 +246,16 @@ function TaskEstimationChart() {
             />
             <g
               transform={`translate(0, ${dimensions.boundedHeight})`}
-              className=""
+              className="x-axis"
             >
+              <text
+                className="fill-slate-500 text-xs capitalize"
+                transform={`translate(${
+                  dimensions.boundedWidth / 2 - dimensions.margin.left
+                }, 40)`}
+              >
+                Hours over-estimated
+              </text>
               {xTicks.map(({ value, xOffset }) => (
                 <g key={value} transform={`translate(${xOffset})`} className="">
                   <line y2="6" stroke="currentColor" />
@@ -269,26 +277,24 @@ function TaskEstimationChart() {
           className="tooltip"
           style={{ opacity: displayTooltip ? 1 : 0 }}
         >
-          <div className="tooltip-range" id="range">
-            {tooltipData.range}
-          </div>
-          <div className="tooltip-examples" id="examples">
+          <div className="font-semibold mb-1">{tooltipData.range}</div>
+          <div className="mt-3 mb-1 text-xs font-light opacity-60 overflow-hidden text-ellipsis max-w-sm">
             {tooltipData.task.map((task) => (
               <span key={task}>{task}</span>
             ))}
           </div>
-          <div className="tooltip-value">
+          <div className="mb-1 text-xs font-medium">
             ...of <span id="count">{tooltipData.count}</span> tasks
           </div>
-          <div className="tooltip-bar-value">
+          <div className="text-xs mb-1 mt-4">
             <b>
               <span id="tooltip-bar-value">{tooltipData.barValue}</span>%
             </b>
             of the work was done by developers
           </div>
-          <div className="tooltip-bar">
+          <div className="mb-2 relative w-full h-3 bg-slate-300">
             <div
-              className="tooltip-bar-fill"
+              className="bg-indigo-950 h-full"
               style={{ width: `${tooltipData.barPercentage}%` }}
             ></div>
           </div>
